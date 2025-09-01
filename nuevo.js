@@ -1,0 +1,116 @@
+const canvas = document.getElementById("miCanvas");
+const context = canvas.getContext("2d");
+
+// Variables del juego
+let score = 0;
+let lives = 3;
+let question = "";
+let answer = "";
+let correct_answer = 0;
+let input_active = true;
+let start_ticks = Date.now();  // Tiempo de inicio
+let game_active = true;  // Variable para controlar el estado del juego
+
+function new_question() {
+    let num1, num2;
+    const operations = ['+', '-', '*', '/'];
+    const operation = operations[Math.floor(Math.random() * operations.length)];
+
+    do {
+        num1 = Math.floor(Math.random() * 10) + 1;
+        num2 = Math.floor(Math.random() * 10) + 1;
+
+        if (operation === '/') {
+            num1 = num1 * num2;  // Hacer que num1 sea un múltiplo de num2
+        }
+        if (operation === '-') {
+            if (num2 > num1) {
+                [num1, num2] = [num2, num1];  // Intercambiar num1 y num2
+            }
+        }
+    } while (num1 === num2);  // Asegurarse de que num1 y num2 no sean iguales
+
+    correct_answer = eval(`${num1} ${operation} ${num2}`);
+    question = `${num1} ${operation} ${num2} = ?`;
+}
+
+function show_score_screen() {
+    context.fillStyle = "white";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "black";
+    context.font = "74px sans-serif";
+    context.fillText("Game Over", 250, 200);
+    context.font = "36px sans-serif";
+    context.fillText(`Puntuación final: ${score}`, 250, 300);
+    game_active = false;  // Desactivar el juego
+    setTimeout(new_game, 20000);  // Esperar 20 segundos
+}
+
+function new_game() {
+    score = 0;
+    lives = 3;
+    game_active = true;  // Reiniciar el estado del juego
+    start_ticks = Date.now();  // Reiniciar el tiempo
+    game_loop();
+}
+
+function draw() {
+    context.fillStyle = "white";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    context.fillStyle = "black";
+    context.font = "74px sans-serif";
+    context.fillText(question, 200, 150);
+    context.font = "36px sans-serif";
+    context.fillText(`Puntuación: ${score}`, 10, 30);
+    context.fillText(`Vidas: ${lives}`, 10, 70);
+    context.fillText(answer, 200, 300);
+    
+    if (game_active) {
+        const seconds = Math.floor((Date.now() - start_ticks) / 1000);
+        context.fillText(`Tiempo: ${seconds}`, 650, 30);
+    }
+
+    if (input_active) {
+        context.strokeStyle = "green";
+        context.strokeRect(200 - 100, 300 - 20, 200, 40);
+    }
+}
+
+function game_loop() {
+    new_question();
+    const loop = () => {
+        draw();
+        requestAnimationFrame(loop);  // Mantener el bucle
+    };
+    loop();
+}
+
+function handle_key(event) {
+    if (input_active && game_active) {
+        if (event.key === "Enter") {
+            if (answer && parseInt(answer) === correct_answer) {
+                score += 1;
+                answer = "";
+                new_question();
+            } else {
+                lives -= 1;
+                answer = "";
+                if (lives === 0) {
+                    input_active = false;  // Desactivar la entrada
+                    show_score_screen();
+                }
+            }
+        } else if (event.key === "Backspace") {
+            answer = answer.slice(0, -1);
+        } else if (event.key.length === 1) {  // Solo agregar caracteres válidos
+            answer += event.key;
+        }
+    }
+}
+
+// Configurar el evento de teclado
+document.addEventListener("keydown", handle_key);
+
+// Iniciar el juego
+game_loop();
