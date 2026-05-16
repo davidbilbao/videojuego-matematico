@@ -10,29 +10,22 @@ let correct_answer = 0;
 let input_active = true;
 let start_ticks = Date.now();  
 let game_active = true;  
+let final_time = 0; // Almacena el tiempo que duró la partida
 
-// --- LÓGICA RESPONSIVE ---
-// Definimos un ancho base sobre el cual diseñamos originalmente (ej. 800px)
+// --- LÓGICA RESPONSIVE EN JAVASCRIPT ---
 const BASE_WIDTH = 800;
-let scale = 1; // Factor de escala que se actualizará dinámicamente
+let scale = 1; 
 
 function resizeCanvas() {
-    // El canvas ocupará el 95% del ancho de la ventana, con un máximo de 800px
     const targetWidth = Math.min(window.innerWidth * 0.95, 800);
-    
-    // Mantenemos una relación de aspecto fija (proporción 16:10 -> alto = ancho * 0.625)
     canvas.width = targetWidth;
-    canvas.height = targetWidth * 0.625;
-
-    // Calculamos cuánto se encogió o agrandó el canvas respecto a la base de 800px
+    canvas.height = targetWidth * 0.625; // Proporción 16:10
     scale = canvas.width / BASE_WIDTH;
 }
 
-// Escuchar el evento de cambiar tamaño de pantalla
 window.addEventListener("resize", resizeCanvas);
-// Ejecutar al cargar la página por primera vez
-resizeCanvas();
-// -------------------------
+resizeCanvas(); // Ejecución inicial
+// ---------------------------------------
 
 function new_question() {
     let num1, num2;
@@ -58,15 +51,18 @@ function new_question() {
 }
 
 function show_score_screen() {
+    // Guardamos el tiempo exacto en el que perdió para mostrarlo en la pantalla final
+    final_time = Math.floor((Date.now() - start_ticks) / 1000);
     game_active = false;  
     input_active = false;  
-    setTimeout(new_game, 4000);  
+    setTimeout(new_game, 5000); // 5 segundos de espera antes de reiniciar
 }
 
 function new_game() {
     score = 0;
     lives = 3;
     answer = "";
+    final_time = 0;
     game_active = true;   
     input_active = true;  
     start_ticks = Date.now();  
@@ -74,62 +70,63 @@ function new_game() {
 }
 
 function draw() {
-    // Limpiar pantalla
+    // Fondo del Canvas
     context.fillStyle = "white";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     if (game_active) {
-        // --- RENDER JUEGO ACTIVO (Multiplicamos tamaños por la variable 'scale') ---
+        // --- RENDER JUEGO ACTIVO ---
         context.fillStyle = "black";
-        
-        // Puntuación y Vidas
-        context.font = `${28 * scale}px sans-serif`;
         context.textAlign = "left";
-        context.fillText(`Puntuación: ${score}`, 20 * scale, 40 * scale);
-        context.fillText(`Vidas: ${lives}`, 20 * scale, 80 * scale);
-
-        // Tiempo (Alineado a la derecha)
+        context.font = `${28 * scale}px sans-serif`;
+        
+        // Bloque de estadísticas (Alineado a la izquierda, uno abajo del otro)
+        context.fillText(`Puntuación: ${score}`, 25 * scale, 45 * scale);
+        context.fillText(`Vidas: ${lives}`, 25 * scale, 85 * scale);
+        
         const seconds = Math.floor((Date.now() - start_ticks) / 1000);
-        context.textAlign = "right";
-        context.fillText(`Tiempo: ${seconds}s`, canvas.width - (20 * scale), 40 * scale);
+        context.fillText(`Tiempo: ${seconds}s`, 25 * scale, 125 * scale); // <-- El tiempo ahora está aquí abajo
 
-        // Pregunta matemática (Centrada vertical y horizontalmente usando porcentajes del alto)
-        context.font = `${70 * scale}px sans-serif`;
+        // Pregunta matemática (Centrada)
+        context.font = `${74 * scale}px sans-serif`;
         context.textAlign = "center";
-        context.fillText(question, canvas.width / 2, canvas.height * 0.4);
+        context.fillText(question, canvas.width / 2, canvas.height * 0.45);
 
         // Respuesta del usuario
-        context.font = `${36 * scale}px sans-serif`;
-        context.fillText(answer, canvas.width / 2, canvas.height * 0.7);
+        context.font = `${38 * scale}px sans-serif`;
+        context.fillText(answer, canvas.width / 2, canvas.height * 0.75);
         
-        // Caja de entrada proporcional
+        // Caja verde de respuesta
         if (input_active) {
             context.strokeStyle = "green";
             context.lineWidth = 3 * scale;
-            
             const boxWidth = 200 * scale;
-            const boxHeight = 50 * scale;
+            const boxHeight = 55 * scale;
             context.strokeRect(
                 (canvas.width / 2) - (boxWidth / 2), 
-                (canvas.height * 0.7) - (boxHeight * 0.7), 
+                (canvas.height * 0.75) - (boxHeight * 0.7), 
                 boxWidth, 
                 boxHeight
             );
         }
     } else {
-        // --- RENDER PANTALLA GAME OVER RESPONSIVE ---
+        // --- RENDER PANTALLA GAME OVER ---
         context.fillStyle = "black";
         context.textAlign = "center";
         
-        context.font = `${70 * scale}px sans-serif`;
-        context.fillText("Game Over", canvas.width / 2, canvas.height * 0.4);
+        context.font = `${74 * scale}px sans-serif`;
+        context.fillText("Game Over", canvas.width / 2, canvas.height * 0.35);
         
         context.font = `${36 * scale}px sans-serif`;
-        context.fillText(`Puntuación final: ${score}`, canvas.width / 2, canvas.height * 0.58);
+        context.fillText(`Puntuación final: ${score}`, canvas.width / 2, canvas.height * 0.52);
         
-        context.font = `${20 * scale}px sans-serif`;
+        // <-- Mostrar el tiempo total aquí al finalizar
+        context.fillStyle = "#d9534f"; // Un color rojo/grisáceo suave para el tiempo final
+        context.fillText(`Tiempo aguantado: ${final_time}s`, canvas.width / 2, canvas.height * 0.65);
+        
+        context.font = `${22 * scale}px sans-serif`;
         context.fillStyle = "gray";
-        context.fillText("Preparando nueva partida...", canvas.width / 2, canvas.height * 0.75);
+        context.fillText("Preparando nueva partida...", canvas.width / 2, canvas.height * 0.8);
     }
 }
 
@@ -157,7 +154,7 @@ function handle_key(event) {
         } else if (event.key === "Backspace") {
             answer = answer.slice(0, -1);
         } else if (/^[0-9-]$/.test(event.key)) {  
-            if (answer.length >= 5) return; // Limite de dígitos para evitar desborde visual
+            if (answer.length >= 5) return; 
             if (event.key === "-" && answer.length > 0) return; 
             answer += event.key;
         }
