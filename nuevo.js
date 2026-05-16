@@ -1,3 +1,34 @@
+const cssEstilos = document.createElement("style");
+cssEstilos.textContent = `
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        background-color: #1a1a1a; 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 15px;
+        overflow: hidden; 
+    }
+    #miCanvas {
+        display: block;
+        width: 100%;         
+        height: auto;        
+        max-width: 800px; /* Límite de escalado en PC */
+        max-height: 85vh;    
+        background-color: #ffffff;
+        border-radius: 16px; 
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); 
+        border: 3px solid #333333; 
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges; 
+    }
+`;
+document.head.appendChild(cssEstilos);
 const canvas = document.getElementById("miCanvas");
 const context = canvas.getContext("2d");
 
