@@ -11,6 +11,29 @@ let input_active = true;
 let start_ticks = Date.now();  
 let game_active = true;  
 
+// --- LÓGICA RESPONSIVE ---
+// Definimos un ancho base sobre el cual diseñamos originalmente (ej. 800px)
+const BASE_WIDTH = 800;
+let scale = 1; // Factor de escala que se actualizará dinámicamente
+
+function resizeCanvas() {
+    // El canvas ocupará el 95% del ancho de la ventana, con un máximo de 800px
+    const targetWidth = Math.min(window.innerWidth * 0.95, 800);
+    
+    // Mantenemos una relación de aspecto fija (proporción 16:10 -> alto = ancho * 0.625)
+    canvas.width = targetWidth;
+    canvas.height = targetWidth * 0.625;
+
+    // Calculamos cuánto se encogió o agrandó el canvas respecto a la base de 800px
+    scale = canvas.width / BASE_WIDTH;
+}
+
+// Escuchar el evento de cambiar tamaño de pantalla
+window.addEventListener("resize", resizeCanvas);
+// Ejecutar al cargar la página por primera vez
+resizeCanvas();
+// -------------------------
+
 function new_question() {
     let num1, num2;
     const operations = ['+', '-', '*', '/'];
@@ -20,17 +43,12 @@ function new_question() {
         num1 = Math.floor(Math.random() * 10) + 1;
         num2 = Math.floor(Math.random() * 10) + 1;
 
-        if (operation === '/') {
-            num1 = num1 * num2;  // Hacer que num1 sea un múltiplo de num2
-        }
+        if (operation === '/') num1 = num1 * num2;  
         if (operation === '-') {
-            if (num2 > num1) {
-                [num1, num2] = [num2, num1];  // Intercambiar num1 y num2
-            }
+            if (num2 > num1) [num1, num2] = [num2, num1];  
         }
     } while (num1 === num2);  
 
-    // Reemplazamos eval() por una estructura limpia (más seguro y rápido)
     if (operation === '+') correct_answer = num1 + num2;
     if (operation === '-') correct_answer = num1 - num2;
     if (operation === '*') correct_answer = num1 * num2;
@@ -40,83 +58,90 @@ function new_question() {
 }
 
 function show_score_screen() {
-    game_active = false;  // Cambiamos el estado (ahora draw() sabe que debe dibujar el Game Over)
-    input_active = false;  // Desactivar la entrada de teclado
-    setTimeout(new_game, 4000);  // Esperar 4 segundos para reiniciar (20 segundos era una eternidad)
+    game_active = false;  
+    input_active = false;  
+    setTimeout(new_game, 4000);  
 }
 
 function new_game() {
     score = 0;
     lives = 3;
     answer = "";
-    game_active = true;   // El juego vuelve a estar activo
-    input_active = true;  // ¡IMPORTANTE! Reactivamos el teclado
-    start_ticks = Date.now();  // Reiniciar el temporizador
-    new_question();       // Generar la primera pregunta de la nueva tanda
-    // NOTA: Ya no llamamos a game_loop() aquí. El bucle inicial sigue corriendo en segundo plano.
+    game_active = true;   
+    input_active = true;  
+    start_ticks = Date.now();  
+    new_question();       
 }
 
 function draw() {
-    // Limpiar la pantalla por completo en cada fotograma
+    // Limpiar pantalla
     context.fillStyle = "white";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     if (game_active) {
-        // --- RENDERIZADO DEL JUEGO ACTIVO ---
+        // --- RENDER JUEGO ACTIVO (Multiplicamos tamaños por la variable 'scale') ---
         context.fillStyle = "black";
         
-        // Puntuación y Vidas (Alineado a la izquierda)
-        context.font = "30px sans-serif";
+        // Puntuación y Vidas
+        context.font = `${28 * scale}px sans-serif`;
         context.textAlign = "left";
-        context.fillText(`Puntuación: ${score}`, 20, 50);
-        context.fillText(`Vidas: ${lives}`, 20, 90);
+        context.fillText(`Puntuación: ${score}`, 20 * scale, 40 * scale);
+        context.fillText(`Vidas: ${lives}`, 20 * scale, 80 * scale);
 
-        // Tiempo (Alineado a la derecha del canvas)
+        // Tiempo (Alineado a la derecha)
         const seconds = Math.floor((Date.now() - start_ticks) / 1000);
         context.textAlign = "right";
-        context.fillText(`Tiempo: ${seconds}s`, canvas.width - 20, 50);
+        context.fillText(`Tiempo: ${seconds}s`, canvas.width - (20 * scale), 40 * scale);
 
-        // Pregunta matemática (Centrada)
-        context.font = "74px sans-serif";
+        // Pregunta matemática (Centrada vertical y horizontalmente usando porcentajes del alto)
+        context.font = `${70 * scale}px sans-serif`;
         context.textAlign = "center";
-        context.fillText(question, canvas.width / 2, 200);
+        context.fillText(question, canvas.width / 2, canvas.height * 0.4);
 
-        // Respuesta del usuario (Centrada)
-        context.font = "36px sans-serif";
-        context.fillText(answer, canvas.width / 2, 340);
+        // Respuesta del usuario
+        context.font = `${36 * scale}px sans-serif`;
+        context.fillText(answer, canvas.width / 2, canvas.height * 0.7);
         
-        // Caja de entrada estética alrededor del número
+        // Caja de entrada proporcional
         if (input_active) {
             context.strokeStyle = "green";
-            context.lineWidth = 3;
-            context.strokeRect(canvas.width / 2 - 100, 340 - 32, 200, 45);
+            context.lineWidth = 3 * scale;
+            
+            const boxWidth = 200 * scale;
+            const boxHeight = 50 * scale;
+            context.strokeRect(
+                (canvas.width / 2) - (boxWidth / 2), 
+                (canvas.height * 0.7) - (boxHeight * 0.7), 
+                boxWidth, 
+                boxHeight
+            );
         }
     } else {
-        // --- RENDERIZADO DE PANTALLA GAME OVER ---
+        // --- RENDER PANTALLA GAME OVER RESPONSIVE ---
         context.fillStyle = "black";
         context.textAlign = "center";
         
-        context.font = "74px sans-serif";
-        context.fillText("Game Over", canvas.width / 2, 200);
+        context.font = `${70 * scale}px sans-serif`;
+        context.fillText("Game Over", canvas.width / 2, canvas.height * 0.4);
         
-        context.font = "36px sans-serif";
-        context.fillText(`Puntuación final: ${score}`, canvas.width / 2, 290);
+        context.font = `${36 * scale}px sans-serif`;
+        context.fillText(`Puntuación final: ${score}`, canvas.width / 2, canvas.height * 0.58);
         
-        context.font = "20px sans-serif";
+        context.font = `${20 * scale}px sans-serif`;
         context.fillStyle = "gray";
-        context.fillText("Preparando nueva partida...", canvas.width / 2, 370);
+        context.fillText("Preparando nueva partida...", canvas.width / 2, canvas.height * 0.75);
     }
 }
 
 function game_loop() {
     draw();
-    requestAnimationFrame(game_loop);  // Un único bucle centralizado que nunca muere
+    requestAnimationFrame(game_loop);  
 }
 
 function handle_key(event) {
     if (input_active && game_active) {
         if (event.key === "Enter") {
-            if (answer !== "") { // Evita enviar respuestas vacías
+            if (answer !== "") { 
                 if (parseInt(answer) === correct_answer) {
                     score += 1;
                     answer = "";
@@ -132,14 +157,13 @@ function handle_key(event) {
         } else if (event.key === "Backspace") {
             answer = answer.slice(0, -1);
         } else if (/^[0-9-]$/.test(event.key)) {  
-            // Filtro Regex: Solo permite números y el signo menos para valores negativos
-            if (event.key === "-" && answer.length > 0) return; // El menos solo puede ir al inicio
+            if (answer.length >= 5) return; // Limite de dígitos para evitar desborde visual
+            if (event.key === "-" && answer.length > 0) return; 
             answer += event.key;
         }
     }
 }
 
-// Eventos e inicialización limpia
 document.addEventListener("keydown", handle_key);
 new_question();
 game_loop();
