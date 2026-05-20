@@ -117,11 +117,11 @@ function draw() {
         context.font = `${28 * scale}px sans-serif`;
         
         // Bloque de estadísticas (Alineado a la izquierda, uno abajo del otro)
-        context.fillText(`Puntuación: ${score}`, 25 * scale, 45 * scale);
-        context.fillText(`❤️: ${lives}`, 25 * scale, 85 * scale);
+        context.fillText(`★ : ${score}`, 25 * scale, 45 * scale);
+        context.fillText(`❤️ : ${lives}`, 25 * scale, 85 * scale);
         
         const seconds = Math.floor((Date.now() - start_ticks) / 1000);
-        context.fillText(`Tiempo: ${seconds}s`, 25 * scale, 125 * scale); // <-- El tiempo ahora está aquí abajo
+        context.fillText(`⏱️: ${seconds}s`, 25 * scale, 125 * scale); // <-- El tiempo ahora está aquí abajo
 
         // Pregunta matemática (Centrada)
         context.font = `${74 * scale}px sans-serif`;
@@ -154,11 +154,11 @@ function draw() {
         context.fillText("Game Over", canvas.width / 2, canvas.height * 0.35);
         
         context.font = `${36 * scale}px sans-serif`;
-        context.fillText(`Puntuación final: ${score}`, canvas.width / 2, canvas.height * 0.52);
+        context.fillText(`★: ${score}`, canvas.width / 2, canvas.height * 0.52);
         
         // <-- Mostrar el tiempo total aquí al finalizar
         context.fillStyle = "#d9534f"; // Un color rojo/grisáceo suave para el tiempo final
-        context.fillText(`Tiempo aguantado: ${final_time}s`, canvas.width / 2, canvas.height * 0.65);
+        context.fillText(`⏱️: ${final_time}s`, canvas.width / 2, canvas.height * 0.65);
         
         context.font = `${22 * scale}px sans-serif`;
         context.fillStyle = "gray";
