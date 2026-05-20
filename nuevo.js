@@ -118,7 +118,7 @@ function draw() {
         
         // Bloque de estadísticas (Alineado a la izquierda, uno abajo del otro)
         context.fillText(`Puntuación: ${score}`, 25 * scale, 45 * scale);
-        context.fillText(`Vidas: ${lives}`, 25 * scale, 85 * scale);
+        context.fillText(`❤️: ${lives}`, 25 * scale, 85 * scale);
         
         const seconds = Math.floor((Date.now() - start_ticks) / 1000);
         context.fillText(`Tiempo: ${seconds}s`, 25 * scale, 125 * scale); // <-- El tiempo ahora está aquí abajo
