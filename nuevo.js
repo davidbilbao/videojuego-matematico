@@ -14,19 +14,24 @@ cssEstilos.textContent = `
         padding: 15px;
         overflow: hidden; 
     }
-    #miCanvas {
-        display: block;
-        width: 100%;         
-        height: auto;        
-        max-width: 800px; /* Límite de escalado en PC */
-        max-height: 85vh;    
-        background-color: #ffffff;
-        border-radius: 16px; 
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); 
-        border: 3px solid #333333; 
-        image-rendering: -webkit-optimize-contrast;
-        image-rendering: crisp-edges; 
-    }
+  #miCanvas {
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;               /* for modern browsers */
+  image-rendering: -moz-crisp-edges;        /* Firefox */
+  image-rendering: -o-crisp-edges;          /* older Opera */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: -moz-crisp-edges;
+  /* evita escalado suave en transform/width: */
+  image-rendering: -webkit-image-rendering: pixelated;
+  /* opcional: limita tamaño lógico del canvas para acentuar píxeles */
+  image-rendering: pixelated;
+  /* Mantén tamaño visual; usa CSS para escalar entero si quieres */
+  /* Opcional: borde y sombra ya definidos por ti */
+  /* Añade estos filtros opcionales para look más “retro” */
+  filter: contrast(1.1) saturate(1.05);
+  /* si quieres un efecto más fuerte de posterización usa SVG/ canvas processing en JS */
+}
 `;
 document.head.appendChild(cssEstilos);
 const canvas = document.getElementById("miCanvas");
